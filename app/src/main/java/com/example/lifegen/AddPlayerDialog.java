@@ -35,7 +35,7 @@ public class AddPlayerDialog extends DialogFragment {
         if (context instanceof AddPlayerDialogListener) {
             listener = (AddPlayerDialogListener) context;
         } else {
-            throw new RuntimeException(context.toString() + " must implement AddPlayerDialogListener");
+            throw new RuntimeException(context + " must implement AddPlayerDialogListener");
         }
     }
 

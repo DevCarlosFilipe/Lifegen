@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity implements AddPlayerDialog.A
         Button btnAddPlayer = findViewById(R.id.btnAddPlayer);
         btnEndBattle = findViewById(R.id.btnEndBattle);
 
+        // Agora instanciamos o novo PlayerAdapter
         playerAdapter = new PlayerAdapter();
         recyclerViewPlayers.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPlayers.setAdapter(playerAdapter);
@@ -57,9 +58,8 @@ public class MainActivity extends AppCompatActivity implements AddPlayerDialog.A
             txtNoBattlePlayers.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
             btnEndBattle.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
             
-            if (!isListEmpty) {
-                playerAdapter.setPlayers(players);
-            }
+            // Usamos submitList() em vez de setPlayers()
+            playerAdapter.submitList(players);
         });
     }
 
