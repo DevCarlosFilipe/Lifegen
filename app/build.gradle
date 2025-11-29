@@ -37,8 +37,8 @@ dependencies {
     implementation libs.constraintlayout
 
     // Dependências do Lifecycle atualizadas para as versões mais recentes
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.10.0"
-    implementation "androidx.lifecycle:lifecycle-livedata:2.10.0"
+    implementation libs.lifecycle.viewmodel
+    implementation libs.lifecycle.livedata
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
