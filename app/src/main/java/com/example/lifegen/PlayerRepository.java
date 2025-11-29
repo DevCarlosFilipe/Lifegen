@@ -46,15 +46,13 @@ public class PlayerRepository {
         );
 
         // Itera sobre o cursor e cria um objeto Player para cada linha
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                long id = cursor.getLong(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_ID));
-                String name = cursor.getString(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_NAME));
-                int maxHp = cursor.getInt(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_HP));
-                players.add(new Player(id, name, maxHp));
-            }
-            cursor.close(); // Sempre feche o cursor!
+        while (cursor.moveToNext()) {
+            long id = cursor.getLong(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_ID));
+            String name = cursor.getString(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_NAME));
+            int maxHp = cursor.getInt(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_HP));
+            players.add(new Player(id, name, maxHp));
         }
+        cursor.close(); // Sempre feche o cursor!
 
         return players;
     }
