@@ -53,7 +53,6 @@ public class PlayerRepository {
                 int maxHp = cursor.getInt(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_HP));
                 players.add(new Player(id, name, maxHp));
             }
-
             cursor.close(); // Sempre feche o cursor!
         }
 
