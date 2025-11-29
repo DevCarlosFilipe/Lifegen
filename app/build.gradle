@@ -36,7 +36,7 @@ dependencies {
     implementation libs.activity
     implementation libs.constraintlayout
 
-    // Dependências do Lifecycle atualizadas para as versões mais recentes
+    // Dependências do Lifecycle referenciando o catálogo de versões
     implementation libs.lifecycle.viewmodel
     implementation libs.lifecycle.livedata
 
