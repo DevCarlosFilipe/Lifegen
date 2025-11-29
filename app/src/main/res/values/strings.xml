@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Lifegen</string>
+    <string name="add_player">Adicionar Jogador</string>
+    <string name="no_battle_players">Sem jogadores em batalha</string>
+    <string name="add_player_form_title">Formulário pra adicionar o jogador</string>
+    <string name="name">Nome</string>
+    <string name="current_max_hp">Vida máxima</string>
+    <string name="add">Adicionar</string>
+    <string name="add_player_npc">Adicionar Jogador / NPC</string>
+    <string name="fill_all_fields">Preencha todos os campos</string>
+    <string name="error_to_add_player">Erro ao adicionar jogador</string>
+    <string name="player_name">Nome do jogador</string>
+    <string name="temp_life">150</string>
+    <string name="end_battle_confirmation">Quer encerrar a batalha?</string>
+    <string name="end_battle">Encerrar batalha</string>
+    <string name="yes">Sim</string>
+    <string name="no">Não</string>
+</resources>
