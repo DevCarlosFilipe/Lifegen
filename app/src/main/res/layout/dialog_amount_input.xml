@@ -5,27 +5,12 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- Campo Nome -->
     <EditText
-        android:id="@+id/etDialogName"
+        android:id="@+id/etAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:hint="@string/name"
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:minWidth="352dp"
-        android:padding="12dp"
-        android:textColor="@color/black"
-        android:textColorHint="@color/black" />
-
-    <!-- Campo Vida -->
-    <EditText
-        android:id="@+id/etDialogMaxHp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:hint="@string/current_max_hp"
+        android:hint="@string/amount"
         android:importantForAutofill="no"
         android:inputType="number"
         android:minWidth="352dp"
@@ -33,14 +18,13 @@
         android:textColor="@color/black"
         android:textColorHint="@color/black" />
 
-    <!-- Botão -->
     <Button
-        android:id="@+id/btnDialogAdd"
+        android:id="@+id/btnApply"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
         android:minWidth="152dp"
-        android:text="@string/add" />
+        android:text="@string/apply" />
 
 </LinearLayout>

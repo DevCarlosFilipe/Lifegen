@@ -13,15 +13,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements AddPlayerDialog.AddPlayerDialogListener {
+public class MainActivity extends AppCompatActivity implements AddPlayerDialog.AddPlayerDialogListener, PlayerAdapter.OnPlayerInteractionListener, AmountInputDialog.AmountDialogListener {
 
     private PlayerViewModel playerViewModel;
     private PlayerAdapter playerAdapter;
 
-    // Views que ainda precisamos referenciar
     private RecyclerView recyclerViewPlayers;
     private TextView txtNoBattlePlayers;
     private Button btnEndBattle;
+
+    private Player selectedPlayer;
+    private boolean isHealAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,28 +42,57 @@ public class MainActivity extends AppCompatActivity implements AddPlayerDialog.A
         Button btnAddPlayer = findViewById(R.id.btnAddPlayer);
         btnEndBattle = findViewById(R.id.btnEndBattle);
 
-        // Agora instanciamos o novo PlayerAdapter
-        playerAdapter = new PlayerAdapter();
+        playerAdapter = new PlayerAdapter(this);
         recyclerViewPlayers.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewPlayers.setAdapter(playerAdapter);
 
         btnAddPlayer.setOnClickListener(view -> showAddPlayerDialog());
-        
         btnEndBattle.setOnClickListener(view -> showEndBattleConfirmationDialog());
     }
 
     private void observePlayers() {
         playerViewModel.getPlayers().observe(this, players -> {
             boolean isListEmpty = players == null || players.isEmpty();
-            
             recyclerViewPlayers.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
             txtNoBattlePlayers.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
             btnEndBattle.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
-            
-            // Usamos submitList() em vez de setPlayers()
             playerAdapter.submitList(players);
         });
     }
+
+    private void showAmountDialog(String title) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        // A verificação de segurança: só mostra o diálogo se não houver outro com a mesma tag.
+        if (fragmentManager.findFragmentByTag("amountDialog") == null) {
+            AmountInputDialog.newInstance(title).show(fragmentManager, "amountDialog");
+        }
+    }
+
+    // --- Listeners da Interface ---
+
+    @Override
+    public void onHealClick(Player player) {
+        selectedPlayer = player;
+        isHealAction = true;
+        showAmountDialog(getString(R.string.enter_heal_amount));
+    }
+
+    @Override
+    public void onDamageClick(Player player) {
+        selectedPlayer = player;
+        isHealAction = false;
+        showAmountDialog(getString(R.string.enter_damage_amount));
+    }
+
+    @Override
+    public void onAmountEntered(int amount) {
+        if (selectedPlayer != null) {
+            int finalAmount = isHealAction ? amount : -amount;
+            playerViewModel.applyHealthChange(selectedPlayer, finalAmount);
+        }
+    }
+    
+    // --- Outros Métodos ---
 
     private void showEndBattleConfirmationDialog() {
         new AlertDialog.Builder(this)

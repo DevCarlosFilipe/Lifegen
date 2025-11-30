@@ -15,19 +15,36 @@ public class PlayerRepository {
         dbHelper = new PlayerDatabaseHelper(context);
     }
 
-    public long insertPlayer(String name, int hp) {
+    public void insertPlayer(String name, int hp) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(PlayerDatabaseHelper.COLUMN_NAME, name);
-        values.put(PlayerDatabaseHelper.COLUMN_HP, hp);
+        values.put(PlayerDatabaseHelper.COLUMN_HP, hp); // Usando a coluna correta para vida atual
 
-        return db.insert(PlayerDatabaseHelper.TABLE_PLAYERS, null, values);
+        db.insert(PlayerDatabaseHelper.TABLE_PLAYERS, null, values);
+    }
+
+    public void updatePlayer(Player player) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(PlayerDatabaseHelper.COLUMN_NAME, player.getName());
+        values.put(PlayerDatabaseHelper.COLUMN_HP, player.getMaxHp()); // Usando a coluna correta para vida atual
+
+        String selection = PlayerDatabaseHelper.COLUMN_ID + " = ?";
+        String[] selectionArgs = { String.valueOf(player.getId()) };
+
+        db.update(
+                PlayerDatabaseHelper.TABLE_PLAYERS,
+                values,
+                selection,
+                selectionArgs
+        );
     }
 
     public void deleteAllPlayers() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        // O argumento 'null' para 'whereClause' e 'whereArgs' deleta todas as linhas.
         db.delete(PlayerDatabaseHelper.TABLE_PLAYERS, null, null);
     }
 
@@ -37,7 +54,7 @@ public class PlayerRepository {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query(
                 PlayerDatabaseHelper.TABLE_PLAYERS,
-                null, // null para retornar todas as colunas
+                null, 
                 null,
                 null,
                 null,
@@ -45,14 +62,13 @@ public class PlayerRepository {
                 PlayerDatabaseHelper.COLUMN_NAME + " ASC"
         );
 
-        // Itera sobre o cursor e cria um objeto Player para cada linha
         while (cursor.moveToNext()) {
             long id = cursor.getLong(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_ID));
             String name = cursor.getString(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_NAME));
-            int maxHp = cursor.getInt(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_HP));
-            players.add(new Player(id, name, maxHp));
+            int currentHp = cursor.getInt(cursor.getColumnIndex(PlayerDatabaseHelper.COLUMN_HP)); // Usando a coluna correta
+            players.add(new Player(id, name, currentHp));
         }
-        cursor.close(); // Sempre feche o cursor!
+        cursor.close();
 
         return players;
     }

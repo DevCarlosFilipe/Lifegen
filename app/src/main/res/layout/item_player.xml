@@ -1,26 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp">
 
-    <TextView
-        android:id="@+id/itemPlayerName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
-        android:text="Player Name"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
+    <!-- Pontos de Vida -->
     <TextView
         android:id="@+id/itemPlayerHp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:text="100"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        tools:text="100" />
+
+    <!-- Ícone de Dano -->
+    <ImageButton
+        android:id="@+id/btnDamage"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_toStartOf="@id/itemPlayerHp"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_skull_crossbones"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/damage" />
+
+    <!-- Ícone de Cura -->
+    <ImageButton
+        android:id="@+id/btnHeal"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_toStartOf="@id/btnDamage"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:src="@drawable/ic_hand_holding_medical"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/heal" />
+
+    <!-- Nome do Jogador -->
+    <TextView
+        android:id="@+id/itemPlayerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/btnHeal"
+        android:layout_centerVertical="true"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        tools:text="Player Name That is Very Long" />
 
 </RelativeLayout>

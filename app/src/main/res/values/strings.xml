@@ -15,4 +15,12 @@
     <string name="end_battle">Encerrar batalha</string>
     <string name="yes">Sim</string>
     <string name="no">Não</string>
+
+    <!-- Novas Strings para Dano/Cura -->
+    <string name="heal">Curar</string>
+    <string name="damage">Dano</string>
+    <string name="enter_heal_amount">Digite a quantidade de cura</string>
+    <string name="enter_damage_amount">Digite a quantidade de dano</string>
+    <string name="amount">Quanto altera</string>
+    <string name="apply">Aplicar</string>
 </resources>
