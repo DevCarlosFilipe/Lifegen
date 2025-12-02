@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 
-
 public class AmountInputDialog extends DialogFragment {
 
     // Interface para comunicar a ação para a Activity
@@ -22,6 +21,16 @@ public class AmountInputDialog extends DialogFragment {
 
     private AmountDialogListener listener;
     private String title;
+
+    // ----------- VIEW HOLDER PADRÃO -----------
+    private static class ViewHolder {
+        EditText etAmount;
+        Button btnApply;
+    }
+
+    private final ViewHolder mViewHolder = new ViewHolder();
+    // -------------------------------------------
+
 
     public static AmountInputDialog newInstance(String title) {
         AmountInputDialog dialog = new AmountInputDialog();
@@ -34,11 +43,11 @@ public class AmountInputDialog extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             title = getArguments().getString("title");
         }
 
-        // Define o listener. A Activity que chamar este diálogo DEVE implementar a interface.
         try {
             listener = (AmountDialogListener) getActivity();
         } catch (ClassCastException e) {
@@ -49,21 +58,28 @@ public class AmountInputDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = requireActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_amount_input, null);
 
-        final EditText etAmount = view.findViewById(R.id.etAmount);
-        Button btnApply = view.findViewById(R.id.btnApply);
+        // ----- Inicializando ViewHolder -----
+        mViewHolder.etAmount = view.findViewById(R.id.etAmount);
+        mViewHolder.btnApply = view.findViewById(R.id.btnApply);
+        // ------------------------------------
 
-        btnApply.setOnClickListener(v -> {
-            String amountStr = etAmount.getText().toString();
+        // Listener usando ViewHolder
+        mViewHolder.btnApply.setOnClickListener(v -> {
+            String amountStr = mViewHolder.etAmount.getText().toString().trim();
+
             if (!amountStr.isEmpty()) {
                 int amount = Integer.parseInt(amountStr);
                 listener.onAmountEntered(amount);
                 dismiss();
             } else {
-                Toast.makeText(getContext(), "Por favor, insira um valor", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),
+                        R.string.please_enter_a_value,
+                        Toast.LENGTH_SHORT).show();
             }
         });
 

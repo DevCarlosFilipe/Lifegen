@@ -5,71 +5,116 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.recyclerview.widget.RecyclerView;
 
-public class MainActivity extends AppCompatActivity implements AddPlayerDialog.AddPlayerDialogListener, PlayerAdapter.OnPlayerInteractionListener, AmountInputDialog.AmountDialogListener {
+public class MainActivity extends AppCompatActivity
+        implements AddPlayerDialog.AddPlayerDialogListener,
+        PlayerAdapter.OnPlayerInteractionListener,
+        AmountInputDialog.AmountDialogListener {
 
-    private PlayerViewModel playerViewModel;
-    private PlayerAdapter playerAdapter;
+    // ------------------------------
+    //   VIEW HOLDER INTERNO
+    // ------------------------------
+    private static class ViewHolder {
+        PlayerViewModel playerViewModel;
+        PlayerAdapter playerAdapter;
 
-    private RecyclerView recyclerViewPlayers;
-    private TextView txtNoBattlePlayers;
-    private Button btnEndBattle;
+        RecyclerView recyclerViewPlayers;
+        TextView txtNoBattlePlayers;
+        Button btnEndBattle;
+        Button btnAddPlayer;
+    }
+
+    private ViewHolder mViewHolder = new ViewHolder();  // INSTÂNCIA DO VIEWHOLDER
 
     private Player selectedPlayer;
     private boolean isHealAction;
 
+    // ------------------------------
+    //   ACTIVITY
+    // ------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+        mViewHolder = new ViewHolder();  // IMPORTANTE!!!
 
-        setupUI();
+        initViews();
+        initViewModel();
+        setupRecycler();
+        setListeners();
         observePlayers();
     }
 
-    private void setupUI() {
-        recyclerViewPlayers = findViewById(R.id.recyclerViewPlayers);
-        txtNoBattlePlayers = findViewById(R.id.txtNoBattlePlayers);
-        Button btnAddPlayer = findViewById(R.id.btnAddPlayer);
-        btnEndBattle = findViewById(R.id.btnEndBattle);
-
-        playerAdapter = new PlayerAdapter(this);
-        recyclerViewPlayers.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewPlayers.setAdapter(playerAdapter);
-
-        btnAddPlayer.setOnClickListener(view -> showAddPlayerDialog());
-        btnEndBattle.setOnClickListener(view -> showEndBattleConfirmationDialog());
+    // ------------------------------
+    //   VIEWHolder Bind
+    // ------------------------------
+    private void initViews() {
+        mViewHolder.recyclerViewPlayers = findViewById(R.id.recyclerViewPlayers);
+        mViewHolder.txtNoBattlePlayers = findViewById(R.id.txtNoBattlePlayers);
+        mViewHolder.btnAddPlayer = findViewById(R.id.btnAddPlayer);
+        mViewHolder.btnEndBattle = findViewById(R.id.btnEndBattle);
     }
 
+    private void initViewModel() {
+        mViewHolder.playerViewModel = new ViewModelProvider(this).get(PlayerViewModel.class);
+    }
+
+    private void setupRecycler() {
+        mViewHolder.playerAdapter = new PlayerAdapter(this);
+        mViewHolder.recyclerViewPlayers.setLayoutManager(new LinearLayoutManager(this));
+        mViewHolder.recyclerViewPlayers.setAdapter(mViewHolder.playerAdapter);
+    }
+
+    private void setListeners() {
+        mViewHolder.btnAddPlayer.setOnClickListener(v -> showAddPlayerDialog());
+        mViewHolder.btnEndBattle.setOnClickListener(v -> showEndBattleConfirmationDialog());
+    }
+
+    // ------------------------------
+    //   OBSERVER
+    // ------------------------------
     private void observePlayers() {
-        playerViewModel.getPlayers().observe(this, players -> {
+        mViewHolder.playerViewModel.getPlayers().observe(this, players -> {
+
             boolean isListEmpty = players == null || players.isEmpty();
-            recyclerViewPlayers.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
-            txtNoBattlePlayers.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
-            btnEndBattle.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
-            playerAdapter.submitList(players);
+
+            mViewHolder.recyclerViewPlayers.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
+            mViewHolder.txtNoBattlePlayers.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
+            mViewHolder.btnEndBattle.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
+
+            mViewHolder.playerAdapter.submitList(players);
         });
     }
 
+    // ------------------------------
+    //   DIALOGS
+    // ------------------------------
     private void showAmountDialog(String title) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        // A verificação de segurança: só mostra o diálogo se não houver outro com a mesma tag.
-        if (fragmentManager.findFragmentByTag("amountDialog") == null) {
-            AmountInputDialog.newInstance(title).show(fragmentManager, "amountDialog");
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag("amountDialog") == null) {
+            AmountInputDialog.newInstance(title).show(fm, "amountDialog");
         }
     }
 
-    // --- Listeners da Interface ---
+    private void showAddPlayerDialog() {
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.findFragmentByTag("addPlayerDialog") == null) {
+            AddPlayerDialog dialog = new AddPlayerDialog();
+            dialog.show(fm, "addPlayerDialog");
+        }
+    }
 
+    // ------------------------------
+    //   LISTENER: Heal / Damage
+    // ------------------------------
     @Override
     public void onHealClick(Player player) {
         selectedPlayer = player;
@@ -88,35 +133,31 @@ public class MainActivity extends AppCompatActivity implements AddPlayerDialog.A
     public void onAmountEntered(int amount) {
         if (selectedPlayer != null) {
             int finalAmount = isHealAction ? amount : -amount;
-            playerViewModel.applyHealthChange(selectedPlayer, finalAmount);
+            mViewHolder.playerViewModel.applyHealthChange(selectedPlayer, finalAmount);
         }
     }
-    
-    // --- Outros Métodos ---
 
+    // ------------------------------
+    //   FINALIZAR BATALHA
+    // ------------------------------
     private void showEndBattleConfirmationDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.end_battle)
                 .setMessage(R.string.end_battle_confirmation)
                 .setPositiveButton(R.string.yes, (dialog, which) -> {
-                    playerViewModel.endBattle();
-                    Toast.makeText(this, "Batalha encerrada!", Toast.LENGTH_SHORT).show();
+                    mViewHolder.playerViewModel.endBattle();
+                    Toast.makeText(this, R.string.battle_over, Toast.LENGTH_SHORT).show();
                 })
                 .setNegativeButton(R.string.no, null)
                 .show();
     }
 
+    // ------------------------------
+    //   CALLBACK DO DIALOG DE ADD PLAYER
+    // ------------------------------
     @Override
     public void onAddPlayer(String name, int life) {
-        playerViewModel.addPlayer(name, life);
-        Toast.makeText(this, "Jogador adicionado!", Toast.LENGTH_SHORT).show();
-    }
-
-    private void showAddPlayerDialog() {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        if (fragmentManager.findFragmentByTag("addPlayerDialog") == null) {
-            AddPlayerDialog addPlayerDialog = new AddPlayerDialog();
-            addPlayerDialog.show(fragmentManager, "addPlayerDialog");
-        }
+        mViewHolder.playerViewModel.addPlayer(name, life);
+        Toast.makeText(this, R.string.added_player, Toast.LENGTH_SHORT).show();
     }
 }

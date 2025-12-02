@@ -5,13 +5,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.util.Objects;
 
-public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.PlayerViewHolder> {
+public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.ViewHolder> {
 
     public interface OnPlayerInteractionListener {
         void onHealClick(Player player);
@@ -20,64 +22,75 @@ public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.PlayerViewH
 
     private final OnPlayerInteractionListener listener;
 
-    // O listener é essencial, então o marcamos como NonNull para garantir que seja sempre fornecido.
     public PlayerAdapter(@NonNull OnPlayerInteractionListener listener) {
         super(DIFF_CALLBACK);
         this.listener = listener;
     }
 
-    private static final DiffUtil.ItemCallback<Player> DIFF_CALLBACK = new DiffUtil.ItemCallback<>() {
-        @Override
-        public boolean areItemsTheSame(@NonNull Player oldItem, @NonNull Player newItem) {
-            return oldItem.getId() == newItem.getId();
+    private static final DiffUtil.ItemCallback<Player> DIFF_CALLBACK =
+            new DiffUtil.ItemCallback<>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull Player oldItem, @NonNull Player newItem) {
+                    return oldItem.getId() == newItem.getId();
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull Player oldItem, @NonNull Player newItem) {
+                    return oldItem.getMaxHp() == newItem.getMaxHp() &&
+                            Objects.equals(oldItem.getName(), newItem.getName());
+                }
+            };
+
+    // ---------------------------------------------------------------------------------------------
+    // VIEW HOLDER MODELO PADRÃO (igual ao da MainActivity)
+    // ---------------------------------------------------------------------------------------------
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+
+        static class UI {
+            TextView nameTextView;
+            TextView hpTextView;
+            ImageButton btnHeal;
+            ImageButton btnDamage;
         }
 
-        @Override
-        public boolean areContentsTheSame(@NonNull Player oldItem, @NonNull Player newItem) {
-            return oldItem.getMaxHp() == newItem.getMaxHp() &&
-                    Objects.equals(oldItem.getName(), newItem.getName());
-        }
-    };
+        UI ui;
 
-    @NonNull
-    @Override
-    public PlayerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_player, parent, false);
-        // O ViewHolder não precisa mais do listener em seu construtor.
-        return new PlayerViewHolder(itemView);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull PlayerViewHolder holder, int position) {
-        Player currentPlayer = getItem(position);
-        if (currentPlayer != null) {
-            holder.bind(currentPlayer);
-
-            // A lógica do listener agora fica aqui: o local mais seguro e limpo.
-            holder.btnHeal.setOnClickListener(v -> listener.onHealClick(currentPlayer));
-            holder.btnDamage.setOnClickListener(v -> listener.onDamageClick(currentPlayer));
-        }
-    }
-
-    // ViewHolder agora é mais simples: sua única função é segurar as views e preenchê-las.
-    public static class PlayerViewHolder extends RecyclerView.ViewHolder {
-        private final TextView nameTextView;
-        private final TextView hpTextView;
-        private final ImageButton btnHeal;
-        private final ImageButton btnDamage;
-
-        public PlayerViewHolder(@NonNull View itemView) {
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            nameTextView = itemView.findViewById(R.id.itemPlayerName);
-            hpTextView = itemView.findViewById(R.id.itemPlayerHp);
-            btnHeal = itemView.findViewById(R.id.btnHeal);
-            btnDamage = itemView.findViewById(R.id.btnDamage);
+            ui = new UI();
+
+            ui.nameTextView = itemView.findViewById(R.id.itemPlayerName);
+            ui.hpTextView = itemView.findViewById(R.id.itemPlayerHp);
+            ui.btnHeal = itemView.findViewById(R.id.btnHeal);
+            ui.btnDamage = itemView.findViewById(R.id.btnDamage);
         }
 
         public void bind(Player player) {
-            nameTextView.setText(player.getName());
-            hpTextView.setText(String.valueOf(player.getMaxHp()));
+            ui.nameTextView.setText(player.getName());
+            ui.hpTextView.setText(String.valueOf(player.getMaxHp()));
         }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View item = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_player, parent, false);
+        return new ViewHolder(item);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Player player = getItem(position);
+
+        if (player == null) return;
+
+        holder.bind(player);
+
+        // Listeners seguem aqui, como no código anterior
+        holder.ui.btnHeal.setOnClickListener(v -> listener.onHealClick(player));
+        holder.ui.btnDamage.setOnClickListener(v -> listener.onDamageClick(player));
     }
 }
