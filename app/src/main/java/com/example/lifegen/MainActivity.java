@@ -1,26 +1,27 @@
 package com.example.lifegen;
 
+import android.content.DialogInterface;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
-
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.textfield.TextInputEditText;
 
 public class MainActivity extends AppCompatActivity
         implements AddPlayerDialog.AddPlayerDialogListener,
         PlayerAdapter.OnPlayerInteractionListener,
         AmountInputDialog.AmountDialogListener {
 
-    // ------------------------------
-    //   VIEW HOLDER INTERNO
-    // ------------------------------
     private static class ViewHolder {
         PlayerViewModel playerViewModel;
         PlayerAdapter playerAdapter;
@@ -31,20 +32,15 @@ public class MainActivity extends AppCompatActivity
         Button btnAddPlayer;
     }
 
-    private ViewHolder mViewHolder = new ViewHolder();  // INSTÂNCIA DO VIEWHOLDER
+    private final ViewHolder mViewHolder = new ViewHolder();
 
     private Player selectedPlayer;
     private boolean isHealAction;
 
-    // ------------------------------
-    //   ACTIVITY
-    // ------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mViewHolder = new ViewHolder();  // IMPORTANTE!!!
 
         initViews();
         initViewModel();
@@ -53,9 +49,6 @@ public class MainActivity extends AppCompatActivity
         observePlayers();
     }
 
-    // ------------------------------
-    //   VIEWHolder Bind
-    // ------------------------------
     private void initViews() {
         mViewHolder.recyclerViewPlayers = findViewById(R.id.recyclerViewPlayers);
         mViewHolder.txtNoBattlePlayers = findViewById(R.id.txtNoBattlePlayers);
@@ -78,25 +71,16 @@ public class MainActivity extends AppCompatActivity
         mViewHolder.btnEndBattle.setOnClickListener(v -> showEndBattleConfirmationDialog());
     }
 
-    // ------------------------------
-    //   OBSERVER
-    // ------------------------------
     private void observePlayers() {
         mViewHolder.playerViewModel.getPlayers().observe(this, players -> {
-
             boolean isListEmpty = players == null || players.isEmpty();
-
             mViewHolder.recyclerViewPlayers.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
             mViewHolder.txtNoBattlePlayers.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
             mViewHolder.btnEndBattle.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
-
             mViewHolder.playerAdapter.submitList(players);
         });
     }
 
-    // ------------------------------
-    //   DIALOGS
-    // ------------------------------
     private void showAmountDialog(String title) {
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentByTag("amountDialog") == null) {
@@ -107,14 +91,10 @@ public class MainActivity extends AppCompatActivity
     private void showAddPlayerDialog() {
         FragmentManager fm = getSupportFragmentManager();
         if (fm.findFragmentByTag("addPlayerDialog") == null) {
-            AddPlayerDialog dialog = new AddPlayerDialog();
-            dialog.show(fm, "addPlayerDialog");
+            new AddPlayerDialog().show(fm, "addPlayerDialog");
         }
     }
 
-    // ------------------------------
-    //   LISTENER: Heal / Damage
-    // ------------------------------
     @Override
     public void onHealClick(Player player) {
         selectedPlayer = player;
@@ -130,6 +110,48 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onEditClick(Player player) {
+        showEditPlayerDialog(player);
+    }
+
+    private void showEditPlayerDialog(Player player) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.dialog_edit_player, null);
+
+        final TextInputEditText editPlayerName = dialogView.findViewById(R.id.editPlayerName);
+        final TextInputEditText editPlayerMaxHp = dialogView.findViewById(R.id.editPlayerMaxHp);
+        Button btnDeletePlayer = dialogView.findViewById(R.id.btnDeletePlayer);
+
+        editPlayerName.setText(player.getName());
+        editPlayerMaxHp.setText(String.valueOf(player.getMaxHp()));
+
+        builder.setView(dialogView)
+                .setPositiveButton("Salvar", (dialog, id) -> {
+                    String newName = editPlayerName.getText().toString();
+                    int newMaxHp = Integer.parseInt(editPlayerMaxHp.getText().toString());
+                    mViewHolder.playerViewModel.updatePlayer(player, newName, newMaxHp);
+                })
+                .setNegativeButton("Cancelar", (dialog, id) -> dialog.dismiss());
+
+        AlertDialog alertDialog = builder.create();
+
+        btnDeletePlayer.setOnClickListener(v -> {
+            new AlertDialog.Builder(this)
+                    .setTitle("Excluir Jogador")
+                    .setMessage("Tem certeza que deseja excluir " + player.getName() + "?")
+                    .setPositiveButton("Sim", (dialog, which) -> {
+                        mViewHolder.playerViewModel.removePlayer(player);
+                        alertDialog.dismiss();
+                    })
+                    .setNegativeButton("Não", null)
+                    .show();
+        });
+
+        alertDialog.show();
+    }
+
+    @Override
     public void onAmountEntered(int amount) {
         if (selectedPlayer != null) {
             int finalAmount = isHealAction ? amount : -amount;
@@ -137,9 +159,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // ------------------------------
-    //   FINALIZAR BATALHA
-    // ------------------------------
     private void showEndBattleConfirmationDialog() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.end_battle)
@@ -152,9 +171,6 @@ public class MainActivity extends AppCompatActivity
                 .show();
     }
 
-    // ------------------------------
-    //   CALLBACK DO DIALOG DE ADD PLAYER
-    // ------------------------------
     @Override
     public void onAddPlayer(String name, int life) {
         mViewHolder.playerViewModel.addPlayer(name, life);

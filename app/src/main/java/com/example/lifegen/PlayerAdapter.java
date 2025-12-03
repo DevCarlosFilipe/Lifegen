@@ -18,6 +18,7 @@ public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.ViewHolder>
     public interface OnPlayerInteractionListener {
         void onHealClick(Player player);
         void onDamageClick(Player player);
+        void onEditClick(Player player);
     }
 
     private final OnPlayerInteractionListener listener;
@@ -37,13 +38,11 @@ public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.ViewHolder>
                 @Override
                 public boolean areContentsTheSame(@NonNull Player oldItem, @NonNull Player newItem) {
                     return oldItem.getMaxHp() == newItem.getMaxHp() &&
+                            oldItem.getCurrentHp() == newItem.getCurrentHp() &&
                             Objects.equals(oldItem.getName(), newItem.getName());
                 }
             };
 
-    // ---------------------------------------------------------------------------------------------
-    // VIEW HOLDER MODELO PADRÃO (igual ao da MainActivity)
-    // ---------------------------------------------------------------------------------------------
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         static class UI {
@@ -51,6 +50,7 @@ public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.ViewHolder>
             TextView hpTextView;
             ImageButton btnHeal;
             ImageButton btnDamage;
+            ImageButton btnEdit;
         }
 
         UI ui;
@@ -63,15 +63,15 @@ public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.ViewHolder>
             ui.hpTextView = itemView.findViewById(R.id.itemPlayerHp);
             ui.btnHeal = itemView.findViewById(R.id.btnHeal);
             ui.btnDamage = itemView.findViewById(R.id.btnDamage);
+            ui.btnEdit = itemView.findViewById(R.id.btnEdit);
         }
 
         public void bind(Player player) {
             ui.nameTextView.setText(player.getName());
-            ui.hpTextView.setText(String.valueOf(player.getMaxHp()));
+            String hpText = player.getCurrentHp() + "/" + player.getMaxHp();
+            ui.hpTextView.setText(hpText);
         }
     }
-
-    // ---------------------------------------------------------------------------------------------
 
     @NonNull
     @Override
@@ -89,8 +89,8 @@ public class PlayerAdapter extends ListAdapter<Player, PlayerAdapter.ViewHolder>
 
         holder.bind(player);
 
-        // Listeners seguem aqui, como no código anterior
         holder.ui.btnHeal.setOnClickListener(v -> listener.onHealClick(player));
         holder.ui.btnDamage.setOnClickListener(v -> listener.onDamageClick(player));
+        holder.ui.btnEdit.setOnClickListener(v -> listener.onEditClick(player));
     }
 }

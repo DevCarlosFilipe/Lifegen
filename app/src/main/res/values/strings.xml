@@ -26,4 +26,10 @@
     <string name="apply">Aplicar</string>
     <string name="added_player">Jogador adicionado!</string>
     <string name="please_enter_a_value">Por favor, insira um valor</string>
+
+    <!-- Novas Strings para Edição -->
+    <string name="edit">Editar</string>
+    <string name="edit_player">Editar Jogador</string>
+    <string name="max_hp">Vida Máxima</string>
+    <string name="delete_player">Excluir Jogador</string>
 </resources>

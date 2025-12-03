@@ -21,13 +21,30 @@ public class PlayerViewModel extends AndroidViewModel {
         return playersLiveData;
     }
 
-    public void loadPlayers() {
+    private void loadPlayers() {
         List<Player> players = repository.getAllPlayers();
-        playersLiveData.setValue(players);
+        playersLiveData.postValue(players);
     }
 
     public void addPlayer(String name, int maxHp) {
         repository.insertPlayer(name, maxHp);
+        loadPlayers();
+    }
+
+    public void removePlayer(Player player) {
+        repository.deletePlayer(player);
+        loadPlayers();
+    }
+
+    public void updatePlayer(Player player, String newName, int newMaxHp) {
+        player.setName(newName);
+        player.setMaxHp(newMaxHp);
+
+        if (player.getCurrentHp() > newMaxHp) {
+            player.setCurrentHp(newMaxHp);
+        }
+
+        repository.updatePlayer(player);
         loadPlayers();
     }
 
@@ -37,14 +54,16 @@ public class PlayerViewModel extends AndroidViewModel {
     }
 
     public void applyHealthChange(Player player, int amount) {
-        int newHp = player.getMaxHp() + amount;
-        // Garante que a vida não fique negativa
-        if (newHp < 0) {
+        int newHp = player.getCurrentHp() + amount;
+
+        if (newHp > player.getMaxHp()) {
+            newHp = player.getMaxHp();
+        } else if (newHp < 0) {
             newHp = 0;
         }
 
-        Player updatedPlayer = new Player(player.getId(), player.getName(), newHp);
-        repository.updatePlayer(updatedPlayer);
+        player.setCurrentHp(newHp);
+        repository.updatePlayer(player);
         loadPlayers();
     }
 }
